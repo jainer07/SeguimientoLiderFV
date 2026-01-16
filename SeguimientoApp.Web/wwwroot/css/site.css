@@ -1,0 +1,29 @@
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 20px;
+    min-width: 320px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.loading-title {
+    font-weight: 700;
+}
+
+.loading-subtitle {
+    font-size: 0.9rem;
+    opacity: .75;
+}

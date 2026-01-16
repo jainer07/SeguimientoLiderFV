@@ -1,0 +1,108 @@
+﻿@model SeguimientoApp.Application.DTOs.PersonaEditDto
+
+@{
+    ViewData["Title"] = "Personas";
+    ViewData["SubTitle"] = "Editar persona";
+}
+
+<div class="container-fluid px-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"> </div>
+            }
+
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="IdPersona" />
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo documento</label>
+                        <input class="form-control" value="@Model.TipoDocumentoCodigo" readonly />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Número</label>
+                        <input class="form-control" value="@Model.NumeroDocumento" readonly />
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="EsLider" />
+                            <label class="form-check-label" asp-for="EsLider">Es líder</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Estado" />
+                            <label class="form-check-label" asp-for="Estado">Activo</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Primer nombre</label>
+                        <input asp-for="PrimerNombre" class="form-control @(ViewData.ModelState["PrimerNombre"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="PrimerNombre" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Segundo nombre</label>
+                        <input asp-for="SegundoNombre" class="form-control @(ViewData.ModelState["SegundoNombre"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="SegundoNombre" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Primer apellido</label>
+                        <input asp-for="PrimerApellido" class="form-control @(ViewData.ModelState["PrimerApellido"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="PrimerApellido" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Segundo apellido</label>
+                        <input asp-for="SegundoApellido" class="form-control @(ViewData.ModelState["SegundoApellido"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="SegundoApellido" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Celular</label>
+                        <input asp-for="Celular" class="form-control @(ViewData.ModelState["Celular"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="Celular" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Correo</label>
+                        <input asp-for="Correo" class="form-control @(ViewData.ModelState["Correo"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="Correo" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">Dirección</label>
+                        <input asp-for="Direccion" class="form-control @(ViewData.ModelState["Direccion"]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                        <span asp-validation-for="Direccion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Lugar votación</label>
+                        <input asp-for="LugarVotacion" class="form-control" />
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">Mesa</label>
+                        <input type="number" asp-for="MesaNumero" min="1" class="form-control" />
+                        <span asp-validation-for="MesaNumero" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <a class="btn btn-secondary" asp-action="Index">Cancelar</a>
+                    <button class="btn btn-primary" type="submit">Guardar</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
