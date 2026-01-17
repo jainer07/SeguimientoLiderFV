@@ -35,7 +35,9 @@
     });
 
     // 3) Mostrar en submits (forms)
-    document.addEventListener("submit", function () {
+    document.addEventListener("submit", function (e) {
+        const form = e.target;
+        if (form && form.dataset && form.dataset.noLoading === "true") return;
         showLoading();
     });
 

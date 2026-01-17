@@ -1,5 +1,6 @@
 ﻿using SeguimientoApp.Application.DTOs;
 using SeguimientoApp.Application.Ports.Persistence;
+using SeguimientoApp.Domain.Enums;
 
 namespace SeguimientoApp.Application.UseCases.Personas
 {
@@ -12,5 +13,11 @@ namespace SeguimientoApp.Application.UseCases.Personas
 
         public Task ToggleEstadoAsync(long idPersona, CancellationToken ct = default)
              => _repo.ToggleEstadoAsync(idPersona, ct);
+
+        public Task<PersonaLiderAssignResult> AddPersonaToLiderAsync(long idLider, long idPersona, CancellationToken ct = default)
+             => _repo.AddPersonaToLiderAsync(idLider, idPersona, ct);
+
+        public Task RemovePersonaFromLiderAsync(long idLider, long idPersona, CancellationToken ct = default)
+             => _repo.RemovePersonaFromLiderAsync(idLider, idPersona, ct);
     }
 }

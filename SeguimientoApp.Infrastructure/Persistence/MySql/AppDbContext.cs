@@ -18,10 +18,22 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql
             modelBuilder.Entity<PersonaModel>().HasOne(p => p.CatalogoTipoDocumento)
                                                .WithMany(c => c.Personas)
                                                .HasForeignKey(p => p.IdTipoDocumento);
+
+            modelBuilder.Entity<PersonaLiderModel>().HasKey(x => new { x.IdLider, x.IdPersona });
+
+            modelBuilder.Entity<PersonaLiderModel>().HasOne(x => x.Lider)
+                                                    .WithMany()
+                                                    .HasForeignKey(x => x.IdLider);
+
+            modelBuilder.Entity<PersonaLiderModel>().HasOne(x => x.Persona)
+                                                    .WithMany()
+                                                    .HasForeignKey(x => x.IdPersona);
         }
 
         public DbSet<CatalogoModel> CatalogoModels { get; private set; }
         public DbSet<ClienteModel> ClienteModels { get; private set; }
         public DbSet<PersonaModel> PersonaModels { get; private set; }
+        public DbSet<PersonaLiderModel> PersonaLiderModels { get; private set; }
+
     }
 }

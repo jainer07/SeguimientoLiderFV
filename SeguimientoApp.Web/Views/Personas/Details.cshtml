@@ -1,0 +1,431 @@
+﻿@model SeguimientoApp.Application.DTOs.PersonaDetailsDto
+
+@{
+    ViewData["Title"] = "Personas";
+    ViewData["SubTitle"] = "";
+    var persona = Model.Persona;
+    string nombreCompleto = $"{persona.PrimerNombre} {persona.SegundoNombre} {persona.PrimerApellido} {persona.SegundoApellido}".Replace("  ", " ").Trim();
+}
+<div class="container-fluid px-4">
+    <section class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h1 class="h4 mb-0">Detalles  de persona</h1>
+            <div class="text-muted small">Documento: @persona.TipoDocumentoCodigo @persona.NumeroDocumento</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary btn-sm"
+               asp-action="Edit" asp-route-id="@persona.IdPersona">
+                <i class="fas fa-edit me-1"></i> Editar
+            </a>
+            <a class="btn btn-secondary btn-sm" asp-action="Index">
+                <i class="fas fa-arrow-left me-1"></i> Regresar
+            </a>
+        </div>
+    </section>
+
+    <section class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-id-card me-1"></i> Información
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <div class="text-muted small">Nombre</div>
+                        <div class="fw-semibold">@nombreCompleto</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="text-muted small">Celular</div>
+                        <div class="fw-semibold">@persona.Celular</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="text-muted small">Correo</div>
+                        <div class="fw-semibold">@persona.Correo</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small">Estado</div>
+                    @if (persona.Estado)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactivo</span>
+                    }
+
+                    <div class="text-muted small mt-3">Es líder</div>
+                    @if (persona.EsLider)
+                    {
+                        <span class="badge bg-primary mb-3"><i class="fas fa-user-tie me-1"></i>Sí</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-light text-dark mb-3">No</span>
+                    }
+
+                    <div class="text-muted small">Dirección</div>
+                    <div class="fw-semibold">@persona.Direccion</div>
+
+                    <div class="text-muted small mt-2">Lugar de votación</div>
+                    <div class="fw-semibold">@persona.LugarVotacion</div>
+
+                    <div class="text-muted small mt-2">Mesa</div>
+                    <div class="fw-semibold">@persona.Mesa</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if (persona.EsLider)
+    {
+        <section class="card mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div>
+                    <i class="fas fa-users me-1"></i>Personas a cargo
+                    <span class="badge bg-light text-dark ms-2">@Model.PersonasACargo.Count</span>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (persona.Estado)
+                {
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form id="frmBuscarPersona" class="mb-3">
+                        <input type="hidden" id="idLider" value="@persona.IdPersona" />
+
+                        <div class="d-flex justify-content-end">
+                            <div class="d-flex flex-column text-end" style="max-width: 520px; width: 100%;">
+                                <label class="form-label mb-1 small text-muted">
+                                    Agregar por cédula
+                                </label>
+
+                                <div class="input-group input-group-sm">
+                                    <input id="txtCedula"
+                                           type="text"
+                                           inputmode="numeric"
+                                           class="form-control"
+                                           placeholder="Escribe la cédula..."
+                                           autocomplete="off" />
+
+                                    <button id="btnBuscarCedula"
+                                            type="button"
+                                            class="btn btn-outline-primary"
+                                            data-bs-toggle="tooltip"
+                                            title="Buscar por cédula">
+                                        <i class="fas fa-search me-1"></i> Buscar
+                                    </button>
+                                </div>
+
+                                <div class="form-text mt-1 small">
+                                    Escribe la cédula y confirma. Si ya tiene líder, te mostramos cuál.
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <form id="frmConfirmAdd" asp-action="AddPersonaToLider" method="post" class="d-none">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idLider" value="@persona.IdPersona" />
+                        <input type="hidden" name="idPersona" id="hdnIdPersonaAdd" value="" />
+                    </form>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle" data-datatable data-dt='{"perPage":10,"searchable":true}'>
+                        <thead>
+                            <tr>
+                                <th>Documento</th>
+                                <th>Nombre</th>
+                                <th>Celular</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var v in Model.PersonasACargo)
+                            {
+                                <tr>
+                                    <td>@v.TipoDocumentoCodigo @v.NumeroDocumento</td>
+                                    <td>@v.NombreCompleto</td>
+                                    <td>@v.Celular</td>
+                                    <td>
+                                        @if (v.Estado)
+                                        {
+                                            <span class="badge bg-success">Activo</span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        }
+                                    </td>
+                                    <td class="text-nowrap text-center">
+                                        <a asp-action="Details"
+                                           asp-route-id="@v.IdPersona"
+                                           class="btn btn-outline-warning btn-sm"
+                                           data-bs-toggle="tooltip"
+                                           title="Ver detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <form asp-action="RemovePersonaFromLider"
+                                              method="post"
+                                              class="d-inline"
+                                              data-confirm-remove="1"
+                                              data-no-loading="true"
+                                              data-persona="@v.NombreCompleto"
+                                              data-doc="@($"{v.TipoDocumentoCodigo} {v.NumeroDocumento}")">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="idLider" value="@persona.IdPersona" />
+                                            <input type="hidden" name="idPersona" value="@v.IdPersona" />
+
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                    type="submit"
+                                                    data-bs-toggle="tooltip"
+                                                    title="Quitar del líder">
+                                                <i class="fas fa-user-minus"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            const txtCedula = document.getElementById('txtCedula');
+            const btnBuscar = document.getElementById('btnBuscarCedula');
+            const idLider = document.getElementById('idLider')?.value;
+            const frmAdd = document.getElementById('frmConfirmAdd');
+            const hdnIdPersonaAdd = document.getElementById('hdnIdPersonaAdd');
+
+            // Enter = buscar
+            txtCedula?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnBuscar?.click();
+                }
+            });
+
+            btnBuscar?.addEventListener('click', async () => {
+                const cedula = (txtCedula?.value || '').trim();
+
+                if (!cedula || !/^\d+$/.test(cedula)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cédula inválida',
+                        text: 'Escribe solo números.'
+                    });
+                    return;
+                }
+
+                btnBuscar.disabled = true;
+
+                try {
+                    const url = `@Url.Action("LookupByCedula", "Personas")?idLider=${encodeURIComponent(idLider)}&cedula=${encodeURIComponent(cedula)}`;
+                    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const data = await res.json();
+
+                    // NOT_FOUND
+                    if (!data || data.code === 'NOT_FOUND' || data.ok === false) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No encontrado',
+                            text: 'No se encontró una persona con esa cédula.'
+                        });
+                        return;
+                    }
+
+                    // SELF
+                    if (data.code === 'SELF') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Esa cédula es del líder',
+                            text: 'No puedes asignarte a ti mismo.'
+                        });
+                        return;
+                    }
+
+                    // INACTIVE
+                    if (data.code === 'INACTIVE') {
+                        const p = data.persona;
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Persona inactiva',
+                            html: `
+                                <div class="text-start">
+                                    <div><b>Persona:</b> ${p.nombreCompleto}</div>
+                                    <div><b>Documento:</b> ${p.tipoDocumentoCodigo} ${p.numeroDocumento}</div>
+                                    <div><b>Celular:</b> ${p.celular ?? ''}</div>
+                                    <div><b>Estado:</b> Inactivo</div>
+                                </div>`
+                        });
+                        return;
+                    }
+
+                    // ASSIGNED
+                    if (data.code === 'ASSIGNED') {
+                        const p = data.persona;
+                        const l = data.lider;
+
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Ya está asignada a un líder',
+                            html: `
+                                <div class="text-start">
+                                    <div><b>Persona:</b> ${p.nombreCompleto}</div>
+                                    <div><b>Documento:</b> ${p.tipoDocumentoCodigo} ${p.numeroDocumento}</div>
+                                    <hr/>
+                                    <div><b>Líder actual:</b> ${l?.nombreCompleto ?? ''}</div>
+                                    <div><b>Documento líder:</b> ${l?.tipoDocumentoCodigo ?? ''} ${l?.numeroDocumento ?? ''}</div>
+                                    <div><b>Celular líder:</b> ${l?.celular ?? ''}</div>
+                                </div>`
+                        });
+                        return;
+                    }
+
+                    if (data.code === 'IS_LIDER') {
+                      const p = data.persona;
+                      Swal.fire({
+                        icon: 'warning',
+                        title: 'No se puede asignar',
+                        html: `
+                          <div class="text-start">
+                            <div><b>Persona:</b> ${p.nombreCompleto}</div>
+                            <div><b>Documento:</b> ${p.tipoDocumentoCodigo} ${p.numeroDocumento}</div>
+                            <hr/>
+                            <div>Esta persona es líder.</div>
+                          </div>`
+                      });
+                      return;
+                    }
+
+                    // AVAILABLE
+                    if (data.code === 'AVAILABLE') {
+                        const p = data.persona;
+
+                        const result = await Swal.fire({
+                            icon: 'question',
+                            title: 'Confirmar asignación',
+                            html: `
+                                <div class="text-start">
+                                    <div><b>Persona:</b> ${p.nombreCompleto}</div>
+                                    <div><b>Documento:</b> ${p.tipoDocumentoCodigo} ${p.numeroDocumento}</div>
+                                    <div><b>Celular:</b> ${p.celular ?? ''}</div>
+                                    <div><b>Estado:</b> ${p.estado ? 'Activo' : 'Inactivo'}</div>
+                                </div>`,
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí, agregar',
+                            cancelButtonText: 'Cancelar'
+                        });
+
+                        if (result.isConfirmed) {
+                            hdnIdPersonaAdd.value = p.idPersona;
+                            frmAdd.submit();
+                        }
+                        return;
+                    }
+
+                    // Fallback
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No disponible',
+                        text: 'No se puede asignar esta persona.'
+                    });
+
+                } catch (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo consultar la cédula.'
+                    });
+                } finally {
+                    btnBuscar.disabled = false;
+                }
+            });
+
+            // Confirmación para quitar del líder
+            document.addEventListener('submit', async (e) => {
+                const form = e.target;
+                if (!form.matches('form[data-confirm-remove="1"]')) return;
+
+                e.preventDefault();
+
+                const personaNombre = form.getAttribute('data-persona') || 'esta persona';
+                const doc = form.getAttribute('data-doc') || '';
+
+                const result = await Swal.fire({
+                    icon: 'warning',
+                    title: '¿Quitar persona del líder?',
+                    html: `
+                        <div class="text-start">
+                            <div><b>Persona:</b> ${personaNombre}</div>
+                            <div><b>Documento:</b> ${doc}</div>
+                            <hr/>
+                            <div>Esta acción solo la desasigna del líder.</div>
+                        </div>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, quitar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!result.isConfirmed) return;
+
+                window.AppLoading?.show();
+                try {
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!res.ok) {
+                        throw new Error('Error HTTP ' + res.status);
+                    }
+
+                    window.AppLoading?.hide();
+                    window.location.reload();
+                } 
+                catch (err) {
+                    window.AppLoading?.hide();
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'No se pudo quitar',
+                        text: 'Ocurrió un error al quitar la persona del líder.'
+                    });
+                }
+            });
+
+        })();
+    </script>
+}
