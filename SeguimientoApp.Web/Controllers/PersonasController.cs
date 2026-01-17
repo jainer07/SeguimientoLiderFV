@@ -94,6 +94,74 @@ namespace SeguimientoApp.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Details(long id, CancellationToken ct)
+        {
+            var details = await _getById.GetDetailsAsync(id, ct);
+            if (details == null) return NotFound();
+
+            return View(details);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LookupByCedula(long idLider, long cedula, CancellationToken ct)
+        {
+            var result = await _getById.LookupByCedulaAsync(idLider, cedula, ct);
+
+            return Json(new { 
+                ok = result.Code != "NOT_FOUND", 
+                code = result.Code, 
+                persona = result.Persona, 
+                lider = result.LiderActual 
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPersonaToLider(long idLider, long idPersona, CancellationToken ct)
+        {
+            var result = await _update.AddPersonaToLiderAsync(idLider, idPersona, ct);
+
+            if (result != PersonaLiderAssignResult.Ok)
+            {
+                TempData["Error"] = result switch
+                {
+                    PersonaLiderAssignResult.SamePerson =>
+                        "No puedes asignarte a ti mismo.",
+
+                    PersonaLiderAssignResult.PersonaNotFound =>
+                        "La persona no existe.",
+
+                    PersonaLiderAssignResult.PersonaInactive =>
+                        "La persona está inactiva.",
+
+                    PersonaLiderAssignResult.PersonaIsLider =>
+                        "Un líder no puede estar asignado a otro líder.",
+
+                    PersonaLiderAssignResult.AlreadyAssigned =>
+                        "La persona ya está asignada a otro líder.",
+
+                    _ =>
+                        "No fue posible asignar la persona."
+                };
+            }
+            else
+            {
+                TempData["Success"] = "Persona asignada correctamente.";
+            }
+
+            return RedirectToAction(nameof(Details), new { id = idLider });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemovePersonaFromLider(long idLider, long idPersona, CancellationToken ct)
+        {
+            await _update.RemovePersonaFromLiderAsync(idLider, idPersona, ct);
+            return RedirectToAction(nameof(Details), new { id = idLider });
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleEstado(long id, CancellationToken ct)
