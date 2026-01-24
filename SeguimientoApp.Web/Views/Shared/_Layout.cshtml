@@ -22,11 +22,7 @@
         <div id="layoutSidenav_content">
             <main>
                 @await Html.PartialAsync("_LoadingOverlay")
-                <div class="container-fluid px-4">
-                    <h1 class="mt-4">@ViewData["Title"]</h1>
-                    <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">@ViewData["SubTitle"]</li>
-                    </ol>
+                <div class="container-fluid px-4 mt-4 mb-4">
                     @RenderBody()
                 </div>
             </main>

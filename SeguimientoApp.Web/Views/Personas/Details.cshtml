@@ -1,4 +1,4 @@
-﻿@model SeguimientoApp.Application.DTOs.PersonaDetailsDto
+﻿@model PersonaDetailsDto
 
 @{
     ViewData["Title"] = "Personas";
@@ -416,7 +416,7 @@
                     window.location.reload();
                 } 
                 catch (err) {
-                    window.AppLoading?.hide();
+                    window.AppLoading?.hide ();
 
                     Swal.fire({
                         icon: 'error',

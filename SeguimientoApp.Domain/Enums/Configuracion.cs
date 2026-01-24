@@ -3,6 +3,8 @@
     public enum TipoCatalogo
     {
         TipoDocumento = 1,
+        TipoEvento = 2,
+        EstadoEvento = 3,
     }
 
     public enum PersonaLiderAssignResult
@@ -14,5 +16,19 @@
         PersonaIsLider,
         AlreadyAssigned,
         DuplicateRelation
+    }
+
+    public enum TipoEvento
+    {
+        SoloLideres = 1,
+        LideresYVotantes = 2
+    }
+
+    public enum EstadoEvento
+    {
+        Planeado = 1,
+        EnEjecucion = 2,
+        Cerrado = 3,
+        Anulado = 4
     }
 }

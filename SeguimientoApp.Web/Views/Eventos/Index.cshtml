@@ -1,0 +1,124 @@
+﻿@model List<EventoDto>
+
+@using SeguimientoApp.Domain.Enums
+
+@{
+    ViewData["Title"] = "Eventos";
+    ViewData["SubTitle"] = "Lista de eventos";
+}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
+
+            <form method="get" class="d-flex flex-wrap align-items-end gap-2 m-0">
+                <div>
+                    <label class="form-label mb-1">Tipo de evento</label>
+                    <select name="tipoEvento" class="form-select form-select-sm" style="min-width: 180px;"
+                            onchange="this.form.submit()">
+                        <option value="" selected="@(ViewBag.TipoEvento == null)">Todos</option>
+                        <option value="@((int)TipoEvento.SoloLideres)" selected="@(ViewBag.TipoEvento is int t1 && t1 == (int)TipoEvento.SoloLideres)">
+                            Solo líderes
+                        </option>
+                        <option value="@((int)TipoEvento.LideresYVotantes)" selected="@(ViewBag.TipoEvento is int t2 && t2 == (int)TipoEvento.LideresYVotantes)">
+                            Líderes y votantes
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label mb-1">Estado</label>
+                    <select name="estadoEvento" class="form-select form-select-sm" style="min-width: 160px;"
+                            onchange="this.form.submit()">
+                        <option value="" selected="@(ViewBag.EstadoEvento == null)">Todos</option>
+                        <option value="@((int)EstadoEvento.Planeado)" selected="@(ViewBag.EstadoEvento is int e1 && e1 == (int)EstadoEvento.Planeado)">
+                            Planeado
+                        </option>
+                        <option value="@((int)EstadoEvento.EnEjecucion)" selected="@(ViewBag.EstadoEvento is int e2 && e2 == (int)EstadoEvento.EnEjecucion)">
+                            En ejecución
+                        </option>
+                        <option value="@((int)EstadoEvento.Cerrado)" selected="@(ViewBag.EstadoEvento is int e3 && e3 == (int)EstadoEvento.Cerrado)">
+                            Cerrado
+                        </option>
+                        <option value="@((int)EstadoEvento.Anulado)" selected="@(ViewBag.EstadoEvento is int e4 && e4 == (int)EstadoEvento.Anulado)">
+                            Anulado
+                        </option>
+                    </select>
+                </div>
+            </form>
+
+            <a class="btn btn-primary btn-sm px-4" asp-controller="Eventos" asp-action="Create">
+                <i class="fas fa-calendar-plus me-1"></i>Nuevo
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <table class="table" data-datatable data-dt='{"perPage":10,"searchable":true}'>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Fecha inicio</th>
+                    <th>Lugar</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var e in Model)
+                {
+                    <tr>
+                        <td>@e.Nombre</td>
+                        <td>@e.TipoEventoNombre</td>
+                        <td>
+                            @{
+                                var badge = "bg-light text-dark";
+                                var text = e.EstadoEventoNombre;
+
+                                switch (e.IdEstadoEventoCat)
+                                {
+                                    case (int)EstadoEvento.Planeado:
+                                        badge = "bg-secondary";
+                                        break;
+                                    case (int)EstadoEvento.EnEjecucion:
+                                        badge = "bg-info";
+                                        break;
+                                    case (int)EstadoEvento.Cerrado:
+                                        badge = "bg-success";
+                                        break;
+                                    case (int)EstadoEvento.Anulado:
+                                        badge = "bg-danger";
+                                        break;
+                                }
+                            }
+                            <span class="badge @badge">@text</span>
+                        </td>
+                        <td>@(e.FechaInicio?.ToString("yyyy-MM-dd") ?? "-")</td>
+                        <td>@(string.IsNullOrWhiteSpace(e.Lugar) ? "-" : e.Lugar)</td>
+
+                        <td class="text-nowrap text-center">
+                            <a asp-action="Details"
+                               asp-route-id="@e.IdEvento"
+                               class="btn btn-outline-warning btn-sm"
+                               data-bs-toggle="tooltip"
+                               title="Ver detalle">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <a asp-action="Edit"
+                               asp-route-id="@e.IdEvento"
+                               class="btn btn-outline-primary btn-sm"
+                               data-bs-toggle="tooltip"
+                               title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+</div>
