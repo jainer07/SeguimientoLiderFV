@@ -26,6 +26,9 @@ namespace SeguimientoApp.Web.Controllers
 
         public async Task<IActionResult> Index(bool? esLider, bool? estado, CancellationToken ct)
         {
+            if (!Request.Query.ContainsKey("esLider"))
+                esLider = true;
+
             ViewBag.EsLider = esLider;
             ViewBag.Estado = estado;
 
@@ -103,6 +106,40 @@ namespace SeguimientoApp.Web.Controllers
 
             return View(details);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateInline(string cedula, int idLider, CancellationToken ct)
+        {
+            // Cargar tipos documento igual que en Create()
+            await CargarTiposDocumentoAsync(ct);
+            ViewBag.IdLider = idLider;
+
+            var dto = new PersonaCreateDto
+            {
+                NumeroDocumento = Convert.ToInt64(cedula),
+                Estado = true,
+                EsLider = false
+            };
+
+            return PartialView("_CreateInline", dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateInline(PersonaCreateDto dto, int idLider, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                await CargarTiposDocumentoAsync(ct);
+                ViewBag.IdLider = idLider;
+                return PartialView("_CreateInline", dto);
+            }
+
+            await _create.ExecuteAsync(dto, ct);
+
+            return Json(new { ok = true, dto.IdPersona });
+        }
+
 
         [HttpGet]
         public IActionResult ImportarVotantes()

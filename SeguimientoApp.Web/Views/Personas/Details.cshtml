@@ -215,6 +215,25 @@
     }
 </div>
 
+<!-- Modal: Crear persona inline -->
+<div class="modal fade" id="mdlCrearPersona" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear persona</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="crearPersonaContainer">
+                    <div class="text-muted">Cargando formulario...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
@@ -255,11 +274,36 @@
 
                     // NOT_FOUND
                     if (!data || data.code === 'NOT_FOUND' || data.ok === false) {
-                        Swal.fire({
+                        const result = await Swal.fire({
                             icon: 'info',
                             title: 'No encontrado',
-                            text: 'No se encontró una persona con esa cédula.'
+                            text: 'No se encontró una persona con esa cédula.',
+                            showCancelButton: true,
+                            confirmButtonText: 'Crear persona',
+                            cancelButtonText: 'Cerrar'
                         });
+
+                        if (!result.isConfirmed) return;
+                        
+                        const modalEl = document.getElementById('mdlCrearPersona');
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        const container = document.getElementById('crearPersonaContainer');
+                        container.innerHTML = `<div class="text-muted">Cargando formulario...</div>`;
+
+                        const urlForm = `@Url.Action("CreateInline", "Personas")?cedula=${encodeURIComponent(cedula)}&idLider=${encodeURIComponent(idLider)}`;
+                        const html = await fetch(urlForm, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r => r.text());
+                        container.innerHTML = html;
+
+                        wireCreateInlineForm({
+                          modal,
+                          container,
+                          onCreated: (idPersona) => {
+                            hdnIdPersonaAdd.value = idPersona;
+                            frmAdd.submit();
+                          }
+                        });
+
+                        modal.show();
                         return;
                     }
 
@@ -425,6 +469,58 @@
                     });
                 }
             });
+            function wireCreateInlineForm({ modal, container, onCreated }) {
+                const form = container.querySelector('form[data-create-inline="1"]');
+                if (!form) return;
+
+                form.addEventListener('submit', async (e) => {
+                  e.preventDefault();
+
+                  const btn = form.querySelector('button[type="submit"]');
+                  if (btn) btn.disabled = true;
+
+                  try {
+                        const res = await fetch(form.action, {
+                            method: 'POST',
+                            body: new FormData(form),
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+
+                        // Si el servidor devuelve HTML (partial con errores), lo re-renderizamos
+                        const contentType = res.headers.get('content-type') || '';
+                        if (contentType.includes('text/html')) {
+                            const html = await res.text();
+                            container.innerHTML = html;
+                            wireCreateInlineForm({ modal, container, onCreated });
+                            return;
+                        }
+
+                        // JSON OK
+                        const data = await res.json();
+                        if (!res.ok || !data?.ok) {
+                            Swal.fire({ icon: 'error', title: 'Error', text: data?.message || 'No se pudo crear.' });
+                            return;
+                        }
+
+                        modal.hide();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Creada',
+                            text: 'La persona fue creada correctamente.'
+                        });
+
+                        onCreated?.(data.idPersona);
+
+                  } 
+                  catch {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo crear la persona.' });
+                  } 
+                  finally {
+                    if (btn) btn.disabled = false;
+                  }
+            });
+        }
 
         })();
     </script>

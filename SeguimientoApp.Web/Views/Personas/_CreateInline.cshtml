@@ -1,0 +1,102 @@
+﻿@model PersonaCreateDto
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+}
+
+<form asp-action="CreateInline" method="post" data-create-inline="1">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" name="idLider" value="@ViewBag.IdLider" />
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label">Tipo documento</label>
+            <select asp-for="IdTipoDocumento"
+                    asp-items="(IEnumerable<SelectListItem>)ViewBag.TiposDocumento"
+                    class="form-select">
+                <option value="">Seleccione</option>
+            </select>
+            <span asp-validation-for="IdTipoDocumento" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Número</label>
+            <input asp-for="NumeroDocumento" class="form-control" />
+            <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="form-check">
+                <input class="form-check-input" asp-for="EsLider" />
+                <label class="form-check-label" asp-for="EsLider">Es líder</label>
+            </div>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="form-check">
+                <input class="form-check-input" asp-for="Estado" />
+                <label class="form-check-label" asp-for="Estado">Activo</label>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Primer nombre</label>
+            <input asp-for="PrimerNombre" class="form-control" />
+            <span asp-validation-for="PrimerNombre" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Segundo nombre</label>
+            <input asp-for="SegundoNombre" class="form-control" />
+            <span asp-validation-for="SegundoNombre" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Primer apellido</label>
+            <input asp-for="PrimerApellido" class="form-control" />
+            <span asp-validation-for="PrimerApellido" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Segundo apellido</label>
+            <input asp-for="SegundoApellido" class="form-control" />
+            <span asp-validation-for="SegundoApellido" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Celular</label>
+            <input asp-for="Celular" class="form-control" />
+            <span asp-validation-for="Celular" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Correo</label>
+            <input asp-for="Correo" class="form-control" />
+            <span asp-validation-for="Correo" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-5">
+            <label class="form-label">Dirección</label>
+            <input asp-for="Direccion" class="form-control" />
+            <span asp-validation-for="Direccion" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Lugar votación</label>
+            <input asp-for="LugarVotacion" class="form-control" />
+        </div>
+
+        <div class="col-md-5">
+            <label class="form-label">Mesa</label>
+            <input type="number" asp-for="MesaNumero" min="1" class="form-control" />
+            <span asp-validation-for="MesaNumero" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2 justify-content-end">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </div>
+</form>
