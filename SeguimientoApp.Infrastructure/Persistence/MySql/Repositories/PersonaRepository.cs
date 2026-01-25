@@ -64,11 +64,58 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
                 .FirstOrDefaultAsync(ct);
         }
 
+        public async Task<PersonaMiniDto?> GetLiderActualByPersonaIdAsync(long idPersona, CancellationToken ct = default)
+        {
+            return await _db.PersonaLiderModels
+            .AsNoTracking()
+            .Where(x => x.IdPersona == idPersona)
+            .Include(x => x.Lider)
+                .ThenInclude(l => l.CatalogoTipoDocumento)
+            .Select(x => new PersonaMiniDto
+            {
+                IdPersona = x.Lider.IdPersona,
+                TipoDocumentoCodigo = x.Lider.CatalogoTipoDocumento.Codigo,
+                NumeroDocumento = x.Lider.NumeroDocumento,
+                NombreCompleto =
+                    (x.Lider.PrimerNombre + " " + x.Lider.SegundoNombre + " " +
+                     x.Lider.PrimerApellido + " " + x.Lider.SegundoApellido).Trim(),
+                Celular = x.Lider.Celular,
+                Estado = x.Lider.Estado
+            })
+            .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<PersonaDocumentoLookupDto?> GetByDocumentoAsync(int idTipoDocumento, long numeroDocumento, CancellationToken ct)
+        {
+            return await _db.PersonaModels.AsNoTracking()
+                .Where(p => p.IdTipoDocumento == idTipoDocumento && p.NumeroDocumento == numeroDocumento)
+                .Select(p => new PersonaDocumentoLookupDto
+                {
+                    IdPersona = p.IdPersona,
+                    IdTipoDocumento = p.IdTipoDocumento,
+                    NumeroDocumento = p.NumeroDocumento,
+                    PrimerNombre = p.PrimerNombre,
+                    SegundoNombre = p.SegundoNombre,
+                    PrimerApellido = p.PrimerApellido,
+                    SegundoApellido = p.SegundoApellido,
+                    EsLider = p.EsLider,
+                    Estado = p.Estado
+                })
+                .FirstOrDefaultAsync(ct);
+        }
+
         public async Task<bool> ExistsByDocumentoAsync(int tipoDocumento, long numeroDocumento, CancellationToken ct = default)
         {
             return await _db.PersonaModels
                 .AsNoTracking()
                 .AnyAsync(p => p.IdTipoDocumento == tipoDocumento && p.NumeroDocumento == numeroDocumento, ct);
+        }
+
+        public async Task<bool> ExistsRelacionLiderAsync(long idLider, long idPersona, CancellationToken ct)
+        {
+            return await _db.PersonaLiderModels.AsNoTracking()
+                                               .AnyAsync(x => x.IdLider == idLider &&
+                                                              x.IdPersona == idPersona, ct);
         }
 
         public async Task<PersonaLookupResultDto> LookupByCedulaAsync(long idLider, long cedula, CancellationToken ct = default)
@@ -135,7 +182,7 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
                 })
                 .FirstOrDefaultAsync(ct);
 
-            
+
 
             if (rel == null)
                 return new PersonaLookupResultDto { Code = "AVAILABLE", Persona = personaMini };
@@ -159,7 +206,7 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
 
         public async Task CreateAsync(PersonaCreateDto dto, CancellationToken ct = default)
         {
-            var persona = new PersonaModel
+            var model = new PersonaModel
             {
                 IdTipoDocumento = dto.IdTipoDocumento ?? 0,
                 NumeroDocumento = dto.NumeroDocumento,
@@ -176,8 +223,10 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
                 Mesa = dto.MesaNumero.HasValue ? $"Mesa {dto.MesaNumero.Value}" : ""
             };
 
-            _db.PersonaModels.Add(persona);
+            _db.PersonaModels.Add(model);
             await _db.SaveChangesAsync(ct);
+
+            dto.IdPersona = model.IdPersona;
         }
 
         public async Task UpdateAsync(PersonaEditDto dto, CancellationToken ct = default)
@@ -256,7 +305,7 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
 
         public async Task<PersonaLiderAssignResult> AddPersonaToLiderAsync(long idLider, long idPersona, CancellationToken ct = default)
         {
-            if (idLider == idPersona) 
+            if (idLider == idPersona)
                 return PersonaLiderAssignResult.SamePerson;
 
             var persona = await _db.PersonaModels
@@ -279,13 +328,13 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
             if (persona.EsLider)
                 return PersonaLiderAssignResult.PersonaIsLider;
 
-            var alreadyAssigned = await _db.PersonaLiderModels.AnyAsync(x => x.IdPersona == idPersona, ct);
-            if (alreadyAssigned) 
-                return PersonaLiderAssignResult.AlreadyAssigned;
-
             var existsSame = await _db.PersonaLiderModels.AnyAsync(x => x.IdLider == idLider && x.IdPersona == idPersona, ct);
             if (existsSame)
                 return PersonaLiderAssignResult.DuplicateRelation;
+
+            var alreadyAssigned = await _db.PersonaLiderModels.AnyAsync(x => x.IdPersona == idPersona, ct);
+            if (alreadyAssigned)
+                return PersonaLiderAssignResult.AlreadyAssigned;
 
             _db.PersonaLiderModels.Add(new PersonaLiderModel
             {

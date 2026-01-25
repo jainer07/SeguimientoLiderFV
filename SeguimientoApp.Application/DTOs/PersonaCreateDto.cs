@@ -4,6 +4,8 @@ namespace SeguimientoApp.Application.DTOs
 {
     public class PersonaCreateDto
     {
+        public long? IdPersona { get; set; }
+
         [Required(ErrorMessage = "El tipo de documento es obligatorio")]
         public int? IdTipoDocumento { get; set; }
 

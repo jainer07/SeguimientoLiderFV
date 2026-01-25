@@ -28,12 +28,32 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql
             modelBuilder.Entity<PersonaLiderModel>().HasOne(x => x.Persona)
                                                     .WithMany()
                                                     .HasForeignKey(x => x.IdPersona);
+
+            modelBuilder.Entity<EventoModel>().HasOne(e => e.TipoEvento)
+                                              .WithMany()
+                                              .HasForeignKey(e => e.IdTipoEventoCat);
+
+            modelBuilder.Entity<EventoModel>().HasOne(e => e.EstadoEvento)
+                                              .WithMany()
+                                              .HasForeignKey(e => e.IdEstadoEventoCat);
+
+            modelBuilder.Entity<EventoActividadModel>().HasIndex(x => new { x.IdEvento, x.Orden })
+                                                       .IsUnique();
+
+            modelBuilder.Entity<ActividadRegistroModel>().HasIndex(x => new { x.IdEventoActividad, x.IdEventoParticipante })
+                                                         .IsUnique();
+
         }
 
         public DbSet<CatalogoModel> CatalogoModels { get; private set; }
         public DbSet<ClienteModel> ClienteModels { get; private set; }
         public DbSet<PersonaModel> PersonaModels { get; private set; }
         public DbSet<PersonaLiderModel> PersonaLiderModels { get; private set; }
+        public DbSet<EventoModel> EventoModels { get; set; }
+        public DbSet<ActividadPlantillaModel> ActividadPlantillaModels { get; set; }
+        public DbSet<EventoActividadModel> EventoActividadModels { get; set; }
+        public DbSet<EventoParticipanteModel> EventoParticipanteModels { get; set; }
+        public DbSet<ActividadRegistroModel> ActividadRegistroModels { get; set; }
 
     }
 }

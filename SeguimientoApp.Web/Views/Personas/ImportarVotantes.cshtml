@@ -1,0 +1,172 @@
+﻿@model ImportVotantesViewModel
+
+@{
+    ViewData["Title"] = "Personas";
+    ViewData["SubTitle"] = "Importar votantes";
+}
+
+<div class="container-fluid px-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@e.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <form asp-action="ImportarVotantes" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label">Archivo CSV</label>
+                    <input type="file" id="archivoCsv" name="archivo" class="form-control" accept=".csv" />
+                    <div class="form-text">
+                        El archivo puede venir separado por coma o por punto y coma.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mb-4">
+                    Importar
+                </button>
+            </form>
+            @if (Model.Result?.Ok == true)
+            {
+                var r = Model.Result;
+                var agregados = r.Rows.Where(x => x.RelacionCreada).ToList();
+                var omitidos = r.Rows.Where(x => !x.RelacionCreada).ToList();
+
+                <div id="importResult">
+                    <div class="alert alert-success d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div class="me-3">
+                            <div class="fw-bold">
+                                Líder: @r.DocumentoLider
+                                @if (!string.IsNullOrWhiteSpace(r.NombreLider))
+                                {
+                                    <span class="text-muted">— @r.NombreLider</span>
+                                }
+                            </div>
+
+                            <div class="small text-muted">
+                                Importación finalizada.
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="badge bg-primary">Personas creadas: @r.PersonasCreadas</span>
+                            <span class="badge bg-success">Asociaciones creadas: @r.RelacionesCreadas</span>
+                            <span class="badge bg-secondary">Omitidos: @r.Omitidos</span>
+
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnClearResumen">
+                                Limpiar resumen
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Agregados -->
+                    @if (agregados.Any())
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Agregados al líder</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Documento</th>
+                                                <th>Persona creada</th>
+                                                <th>Relación</th>
+                                                <th>Líder</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var x in agregados)
+                                            {
+                                                <tr>
+                                                    <td>@x.Documento</td>
+                                                    <td>@(x.PersonaCreada ? "Sí" : "No")</td>
+                                                    <td>Asignado</td>
+                                                    <td>@r.DocumentoLider</td>
+                                                </tr>
+                                            }
+
+                                            @if (!agregados.Any())
+                                            {
+                                                <tr>
+                                                    <td colspan="4" class="text-muted">No se crearon nuevas asociaciones.</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (omitidos.Any())
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Omitidos</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Documento</th>
+                                                <th>Motivo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var x in omitidos)
+                                            {
+                                                <tr>
+                                                    <td>@(x.Documento?.ToString() ?? "-")</td>
+                                                    <td>@x.Motivo</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const fileInput = document.getElementById("archivoCsv");
+            const resultBox = document.getElementById("importResult");
+            const btnClear = document.getElementById("btnClearResumen");
+
+            function clearResumen() {
+                if (resultBox) resultBox.remove(); // lo quita del DOM
+            }
+
+            // 1) Botón "Limpiar resumen"
+            if (btnClear) {
+                btnClear.addEventListener("click", function () {
+                    // limpia resultado y archivo seleccionado
+                    clearResumen();
+                    if (fileInput) fileInput.value = "";
+                });
+            }
+
+            // 2) Si vuelven a seleccionar un archivo, limpia el resumen anterior
+            if (fileInput) {
+                fileInput.addEventListener("change", function () {
+                    clearResumen();
+                });
+            }
+        })();
+    </script>
+}

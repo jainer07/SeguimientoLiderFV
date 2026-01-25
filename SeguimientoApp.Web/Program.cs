@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SeguimientoApp.Application.Ports.Persistence;
 using SeguimientoApp.Application.UseCases.Catalogos;
+using SeguimientoApp.Application.UseCases.Eventos;
 using SeguimientoApp.Application.UseCases.Personas;
 using SeguimientoApp.Infrastructure.Persistence.MySql;
 using SeguimientoApp.Infrastructure.Persistence.MySql.Repositories;
@@ -19,8 +20,17 @@ builder.Services.AddScoped<GetPersonas>();
 builder.Services.AddScoped<GetPersonaById>();
 builder.Services.AddScoped<CreatePersona>();
 builder.Services.AddScoped<UpdatePersona>();
+builder.Services.AddScoped<ImportVotantes>();
 builder.Services.AddScoped<ICatalogoRepositoryPort, CatalogoRepository>();
 builder.Services.AddScoped<GetLsCatalogo>();
+builder.Services.AddScoped<IEventoRepositoryPort, EventoRepository>();
+builder.Services.AddScoped<GetEventos>();
+builder.Services.AddScoped<GetEventoById>();
+builder.Services.AddScoped<CreateEvento>();
+builder.Services.AddScoped<UpdateEvento>();
+builder.Services.AddScoped<IEventoActividadRepositoryPort, EventoActividadRepository>();
+builder.Services.AddScoped<IActividadRegistroRepositoryPort, ActividadRegistroRepository>();
+
 
 var app = builder.Build();
 
@@ -35,6 +45,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Personas}/{action=Index}/{id?}");
 
 app.Run();

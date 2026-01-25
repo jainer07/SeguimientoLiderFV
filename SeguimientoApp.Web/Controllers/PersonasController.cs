@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SeguimientoApp.Application.DTOs;
-using SeguimientoApp.Application.Ports.Persistence;
 using SeguimientoApp.Application.UseCases.Catalogos;
 using SeguimientoApp.Application.UseCases.Personas;
 using SeguimientoApp.Domain.Enums;
+using SeguimientoApp.Web.Models;
 
 namespace SeguimientoApp.Web.Controllers
 {
@@ -14,6 +13,7 @@ namespace SeguimientoApp.Web.Controllers
         GetPersonaById getById,
         CreatePersona create,
         UpdatePersona update,
+        ImportVotantes importarVotantes,
         GetLsCatalogo getLsCatalogo
         ) : Controller
     {
@@ -21,10 +21,14 @@ namespace SeguimientoApp.Web.Controllers
         private readonly GetPersonaById _getById = getById;
         private readonly CreatePersona _create = create;
         private readonly UpdatePersona _update = update;
+        private readonly ImportVotantes _importarVotantes = importarVotantes;
         private readonly GetLsCatalogo _getLsCatalogo = getLsCatalogo;
 
         public async Task<IActionResult> Index(bool? esLider, bool? estado, CancellationToken ct)
         {
+            if (!Request.Query.ContainsKey("esLider"))
+                esLider = true;
+
             ViewBag.EsLider = esLider;
             ViewBag.Estado = estado;
 
@@ -104,15 +108,83 @@ namespace SeguimientoApp.Web.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> CreateInline(string cedula, int idLider, CancellationToken ct)
+        {
+            // Cargar tipos documento igual que en Create()
+            await CargarTiposDocumentoAsync(ct);
+            ViewBag.IdLider = idLider;
+
+            var dto = new PersonaCreateDto
+            {
+                NumeroDocumento = Convert.ToInt64(cedula),
+                Estado = true,
+                EsLider = false
+            };
+
+            return PartialView("_CreateInline", dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateInline(PersonaCreateDto dto, int idLider, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                await CargarTiposDocumentoAsync(ct);
+                ViewBag.IdLider = idLider;
+                return PartialView("_CreateInline", dto);
+            }
+
+            await _create.ExecuteAsync(dto, ct);
+
+            return Json(new { ok = true, dto.IdPersona });
+        }
+
+
+        [HttpGet]
+        public IActionResult ImportarVotantes()
+        {
+            return View(new ImportVotantesViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ImportarVotantes(IFormFile archivo, CancellationToken ct)
+        {
+            if (archivo is null || archivo.Length == 0)
+            {
+                TempData["Error"] = "Selecciona un archivo CSV.";
+                return RedirectToAction(nameof(ImportarVotantes));
+            }
+
+            var ext = Path.GetExtension(archivo.FileName)?.ToLowerInvariant();
+            if (ext != ".csv")
+            {
+                TempData["Error"] = "El archivo debe ser .csv";
+                return RedirectToAction(nameof(ImportarVotantes));
+            }
+
+            await using var stream = archivo.OpenReadStream();
+            var result = await _importarVotantes.ExecuteAsync(stream, ct);
+
+            if (!result.Ok)
+                ModelState.AddModelError("", result.Error ?? "No fue posible procesar el archivo.");
+
+            return View(new ImportVotantesViewModel { Result = result });
+
+        }
+
+        [HttpGet]
         public async Task<IActionResult> LookupByCedula(long idLider, long cedula, CancellationToken ct)
         {
             var result = await _getById.LookupByCedulaAsync(idLider, cedula, ct);
 
-            return Json(new { 
-                ok = result.Code != "NOT_FOUND", 
-                code = result.Code, 
-                persona = result.Persona, 
-                lider = result.LiderActual 
+            return Json(new
+            {
+                ok = result.Code != "NOT_FOUND",
+                code = result.Code,
+                persona = result.Persona,
+                lider = result.LiderActual
             });
         }
 
