@@ -6,7 +6,18 @@
         TipoEvento = 2,
         EstadoEvento = 3,
     }
-
+    public enum ImportRowStatus
+    {
+        Assigned,        // se creó relación líder-persona
+        AlreadyAssigned, // ya tenía líder
+        DuplicateRelation,
+        PersonaInactive,
+        PersonaIsLider,
+        PersonaNotFound,
+        InvalidDocumento,
+        EmptyRow,
+        Error
+    }
     public enum PersonaLiderAssignResult
     {
         Ok = 0,

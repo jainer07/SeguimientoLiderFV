@@ -20,6 +20,7 @@ builder.Services.AddScoped<GetPersonas>();
 builder.Services.AddScoped<GetPersonaById>();
 builder.Services.AddScoped<CreatePersona>();
 builder.Services.AddScoped<UpdatePersona>();
+builder.Services.AddScoped<ImportVotantes>();
 builder.Services.AddScoped<ICatalogoRepositoryPort, CatalogoRepository>();
 builder.Services.AddScoped<GetLsCatalogo>();
 builder.Services.AddScoped<IEventoRepositoryPort, EventoRepository>();
@@ -44,6 +45,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Personas}/{action=Index}/{id?}");
 
 app.Run();

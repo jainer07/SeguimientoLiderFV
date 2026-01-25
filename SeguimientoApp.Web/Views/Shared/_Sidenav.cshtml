@@ -1,5 +1,6 @@
 ﻿@{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
 }
 
 <div id="layoutSidenav_nav">
@@ -7,18 +8,23 @@
         <div class="sb-sidenav-menu">
             <div class="nav">
                 <!-- Personas -->
-                <a class="nav-link @(controller == "Personas" ? "active" : "")" asp-controller="Personas" asp-action="Index">
+                <div class="sb-sidenav-menu-heading">Personas</div>
+                <a class="nav-link @(controller == "Personas" && action == "Index" ? "active" : "")" asp-controller="Personas" asp-action="Index">
                     <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                    Personas
+                    Votantes
+                </a>
+                <a class="nav-link @(controller == "Personas" && action == "ImportarVotantes" ? "active" : "")" asp-controller="Personas" asp-action="ImportarVotantes">
+                    <div class="sb-nav-link-icon"><i class="fas fa-file-csv"></i></div>
+                    Importar votantes
                 </a>
 
                 <!-- Eventos -->
                 <div class="sb-sidenav-menu-heading">Eventos</div>
 
-                <a class="nav-link @(controller == "Eventos" ? "active" : "")" asp-controller="Eventos" asp-action="Index">
+                @* <a class="nav-link @(controller == "Eventos" ? "active" : "")" asp-controller="Eventos" asp-action="Index">
                     <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
                     Eventos
-                </a>
+                </a> *@
 
                 <!-- Seguimiento -->
                 <div class="sb-sidenav-menu-heading">Seguimiento</div>
