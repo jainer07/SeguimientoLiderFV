@@ -1,0 +1,46 @@
+﻿@model EnviarSmsDto
+@{
+    ViewData["Title"] = "Enviar SMS";
+    ViewData["SubTitle"] = "Envio de mensaje de texto";
+}
+
+<div class="container-fluid px-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            @if (ViewBag.Error != null)
+            {
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"> @ViewBag.Error</div>
+            }
+            @if (ViewBag.Ok != null)
+            {
+                <div asp-validation-summary="All" class="alert alert-success">@ViewBag.Ok</div>
+            }
+
+            <form asp-action="EnviarSms" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="mb-3">
+                        <label class="form-label">Celular</label>
+                        <input asp-for="Phone" class="form-control" placeholder="573001234567" required />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mensaje</label>
+                        <textarea asp-for="Message" class="form-control" rows="3" maxlength="160" required>Hola! Prueba SeguimientoLider</textarea>
+                        <div class="form-text">Máx 160 caracteres (para no cobrarte la novela completa).</div>
+                        <span asp-validation-for="Message" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Enviar SMS</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using SeguimientoApp.Application.DTOs;
 using SeguimientoApp.Application.Ports.Persistence;
 using SeguimientoApp.Application.UseCases.Catalogos;
 using SeguimientoApp.Application.UseCases.Eventos;
+using SeguimientoApp.Application.UseCases.Notificacion;
 using SeguimientoApp.Application.UseCases.Personas;
+using SeguimientoApp.Infrastructure.Notificacion.Onurix;
 using SeguimientoApp.Infrastructure.Persistence.MySql;
 using SeguimientoApp.Infrastructure.Persistence.MySql.Repositories;
 
@@ -31,6 +34,24 @@ builder.Services.AddScoped<UpdateEvento>();
 builder.Services.AddScoped<IEventoActividadRepositoryPort, EventoActividadRepository>();
 builder.Services.AddScoped<IActividadRegistroRepositoryPort, ActividadRegistroRepository>();
 
+// ===== Onurix SMS =====
+var onurixOpt = builder.Configuration.GetSection("Onurix").Get<OnurixOptions>() ?? new OnurixOptions();
+builder.Services.AddSingleton(onurixOpt);
+builder.Services.AddHttpClient("onurix", client =>
+{
+    client.BaseAddress = new Uri(onurixOpt.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+builder.Services.AddScoped<INotificacionRepositoryPort>(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    var http = factory.CreateClient("onurix");
+    var opt = sp.GetRequiredService<OnurixOptions>();
+    return new OnurixSmsSender(http, opt);
+});
+
+builder.Services.AddScoped<SendSms>();
 
 var app = builder.Build();
 

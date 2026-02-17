@@ -14,8 +14,7 @@ namespace SeguimientoApp.Web.Controllers
         CreatePersona create,
         UpdatePersona update,
         ImportVotantes importarVotantes,
-        GetLsCatalogo getLsCatalogo
-        ) : Controller
+        GetLsCatalogo getLsCatalogo) : Controller
     {
         private readonly GetPersonas _getPersonas = getPersonas;
         private readonly GetPersonaById _getById = getById;

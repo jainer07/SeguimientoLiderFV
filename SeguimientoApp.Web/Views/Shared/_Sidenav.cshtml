@@ -38,6 +38,17 @@
                         <a class="nav-link @(controller == "Seguimientos" ? "active" : "")" asp-controller="Personas" asp-action="Index">Eventos</a>
                     </nav>
                 </div> *@
+
+                <!-- Notificaciones -->
+                <div class="sb-sidenav-menu-heading">Notificaciones</div>
+                <a class="nav-link @(controller == "Notificacion" && action == "EnviarSms" ? "active" : "")" asp-controller="Notificacion" asp-action="EnviarSms">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Mensaje de texto
+                </a>
+                <a class="nav-link @(controller == "Notificacion" && action == "EnviarWhatsapp" ? "active" : "")" asp-controller="Notificacion" asp-action="EnviarWhatsapp">
+                    <div class="sb-nav-link-icon"><i class="fas fa-file-csv"></i></div>
+                    Whatsapp
+                </a>
             </div>
         </div>
         <div class="sb-sidenav-footer">
