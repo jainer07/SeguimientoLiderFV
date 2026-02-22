@@ -42,4 +42,11 @@
         Cerrado = 3,
         Anulado = 4
     }
+
+    public enum SmsModoEnvio
+    {
+        NumeroManual = 1,
+        VotantePorDocumento = 2,
+        MasivoVotantesActivosNoLideres = 3
+    }
 }

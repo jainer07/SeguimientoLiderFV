@@ -7,33 +7,59 @@
 <div class="container-fluid px-4">
     <div class="card mb-4">
         <div class="card-body">
-            @if (ViewBag.Error != null)
+            @if (TempData["Ok"] != null)
             {
-                <div asp-validation-summary="All" class="alert alert-danger" role="alert"> @ViewBag.Error</div>
+                <div class="alert alert-success">@TempData["Ok"]</div>
             }
-            @if (ViewBag.Ok != null)
+            @if (TempData["Warn"] != null)
             {
-                <div asp-validation-summary="All" class="alert alert-success">@ViewBag.Ok</div>
+                <div class="alert alert-warning" style="white-space:pre-wrap">@TempData["Warn"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
             }
 
             <form asp-action="EnviarSms" method="post">
                 @Html.AntiForgeryToken()
-                <div class="row g-3">
-                    <div class="mb-3">
-                        <label class="form-label">Celular</label>
-                        <input asp-for="Phone" class="form-control" placeholder="573001234567" required />
-                        <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mensaje</label>
-                        <textarea asp-for="Message" class="form-control" rows="3" maxlength="160" required>Hola! Prueba SeguimientoLider</textarea>
-                        <div class="form-text">Máx 160 caracteres (para no cobrarte la novela completa).</div>
-                        <span asp-validation-for="Message" class="text-danger"></span>
+
+                <div class="mb-3">
+                    <label class="form-label">Modo de envío</label>
+                    <div class="d-flex gap-4 flex-wrap">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Modo" value="1" />
+                            <label class="form-check-label">A un número</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Modo" value="2" />
+                            <label class="form-check-label">A un votante (por documento)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Modo" value="3" checked />
+                            <label class="form-check-label">Masivo (votantes activos no líderes)</label>
+                        </div>
                     </div>
                 </div>
 
+                <div id="boxPhone" class="mb-3">
+                    <label class="form-label">Celular</label>
+                    <input asp-for="Phone" class="form-control" placeholder="3001234567" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div id="boxDoc" class="mb-3 d-none">
+                    <label class="form-label">Documento del votante</label>
+                    <input asp-for="NumeroDocumento" class="form-control" placeholder="1065123456" />
+                    <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mensaje</label>
+                    <textarea asp-for="Message" class="form-control" rows="3" maxlength="160" required></textarea>
+                    <div class="form-text">Máx 160 caracteres (para no cobrarte la novela completa).</div>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+
                 <div class="mt-4 d-flex gap-2">
-                    <button class="btn btn-primary" type="submit">Enviar SMS</button>
+                    <button type="submit" id="btnEnviar" class="btn btn-primary">Enviar SMS</button>
                 </div>
             </form>
 
@@ -43,4 +69,42 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const radios = document.querySelectorAll('input[name="Modo"]');
+            const boxPhone = document.getElementById('boxPhone');
+            const boxDoc = document.getElementById('boxDoc');
+
+            function refresh() {
+                const val = document.querySelector('input[name="Modo"]:checked').value;
+                // 1=numero, 2=documento, 3=masivo
+                boxPhone.classList.toggle('d-none', val !== '1');
+                boxDoc.classList.toggle('d-none', val !== '2');
+            }
+
+            radios.forEach(r => r.addEventListener('change', refresh));
+            refresh();
+        })();
+        
+        (function () {
+            const radios = document.querySelectorAll('input[name="Modo"]');
+            const btn = document.getElementById('btnEnviar');
+
+            function actualizarTextoBoton() {
+                const modo = document.querySelector('input[name="Modo"]:checked')?.value;
+
+                if (modo === '3') {
+                    btn.textContent = 'Programar envío';
+                } 
+                else {
+                    btn.textContent = 'Enviar SMS';
+                }
+            }
+
+            radios.forEach(r => r.addEventListener('change', actualizarTextoBoton));
+
+            // Ejecutar al cargar
+            actualizarTextoBoton();
+        })();
+    </script>
 }

@@ -356,6 +356,29 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
             await _db.SaveChangesAsync(ct);
         }
 
+        public async Task<long?> GetCelularByDocumentoAsync(long numeroDocumento, CancellationToken ct = default)
+        {
+            return await _db.PersonaModels
+                .AsNoTracking()
+                .Where(p => p.NumeroDocumento == numeroDocumento)
+                .Select(p => (long?)p.Celular)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<List<long>> GetCelularesVotantesActivosNoLideresAsync(CancellationToken ct = default)
+        {
+            return await _db.PersonaModels
+                .AsNoTracking()
+                .Where(p =>
+                    p.Estado == true &&
+                    p.EsLider == false &&
+                    p.AceptaPoliticaDatos == true &&
+                    p.Celular > 0)
+                .Select(p => p.Celular)
+                .Distinct()
+                .ToListAsync(ct);
+        }  
+
         private static int? TryParseMesa(string? mesa)
         {
             if (string.IsNullOrWhiteSpace(mesa)) return null;

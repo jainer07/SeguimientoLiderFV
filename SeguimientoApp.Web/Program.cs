@@ -8,6 +8,7 @@ using SeguimientoApp.Application.UseCases.Personas;
 using SeguimientoApp.Infrastructure.Notificacion.Onurix;
 using SeguimientoApp.Infrastructure.Persistence.MySql;
 using SeguimientoApp.Infrastructure.Persistence.MySql.Repositories;
+using SeguimientoApp.Web.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,11 @@ builder.Services.AddScoped<CreateEvento>();
 builder.Services.AddScoped<UpdateEvento>();
 builder.Services.AddScoped<IEventoActividadRepositoryPort, EventoActividadRepository>();
 builder.Services.AddScoped<IActividadRegistroRepositoryPort, ActividadRegistroRepository>();
+builder.Services.AddScoped<ISmsOutboxRepositoryPort, SmsOutboxRepository>();
+builder.Services.AddScoped<ScheduleSmsBulk>();
+
+builder.Services.Configure<SmsSendingOptions>(builder.Configuration.GetSection("SmsSending"));
+builder.Services.AddHostedService<SmsOutboxWorker>();
 
 // ===== Onurix SMS =====
 var onurixOpt = builder.Configuration.GetSection("Onurix").Get<OnurixOptions>() ?? new OnurixOptions();

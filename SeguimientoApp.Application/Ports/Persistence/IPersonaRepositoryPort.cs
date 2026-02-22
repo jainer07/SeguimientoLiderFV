@@ -19,5 +19,7 @@ namespace SeguimientoApp.Application.Ports.Persistence
         Task<PersonaDetailsDto?> GetDetailsAsync(long idPersona, CancellationToken ct = default);
         Task<PersonaLiderAssignResult> AddPersonaToLiderAsync(long idLider, long idPersona, CancellationToken ct = default);
         Task RemovePersonaFromLiderAsync(long idLider, long idPersona, CancellationToken ct = default);
+        Task<long?> GetCelularByDocumentoAsync(long numeroDocumento, CancellationToken ct = default);
+        Task<List<long>> GetCelularesVotantesActivosNoLideresAsync(CancellationToken ct = default);
     }
 }

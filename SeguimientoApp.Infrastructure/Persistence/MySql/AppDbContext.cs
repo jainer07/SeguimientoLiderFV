@@ -43,6 +43,17 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql
             modelBuilder.Entity<ActividadRegistroModel>().HasIndex(x => new { x.IdEventoActividad, x.IdEventoParticipante })
                                                          .IsUnique();
 
+            modelBuilder.Entity<SmsOutboxModel>()
+                .HasOne(x => x.Job)
+                .WithMany(j => j.Outbox)
+                .HasForeignKey(x => x.IdJob);
+
+            modelBuilder.Entity<SmsOutboxModel>()
+                .HasIndex(x => new { x.Estado, x.NextAttemptAt });
+
+            modelBuilder.Entity<SmsOutboxModel>()
+                .HasIndex(x => x.IdJob);
+
         }
 
         public DbSet<CatalogoModel> CatalogoModels { get; private set; }
@@ -54,6 +65,8 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql
         public DbSet<EventoActividadModel> EventoActividadModels { get; set; }
         public DbSet<EventoParticipanteModel> EventoParticipanteModels { get; set; }
         public DbSet<ActividadRegistroModel> ActividadRegistroModels { get; set; }
+        public DbSet<SmsJobModel> SmsJobModels { get; set; }
+        public DbSet<SmsOutboxModel> SmsOutboxModels { get; set; }
 
     }
 }
