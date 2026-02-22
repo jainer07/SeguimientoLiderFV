@@ -1,0 +1,79 @@
+﻿@model List<SmsJobListItemDto>
+
+@{
+    ViewData["Title"] = "Historial de Envíos SMS";
+}
+
+<div class="container-fluid px-4">
+    <h3 class="mb-4">Historial de Envíos SMS</h3>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No hay envíos registrados.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>JobId</th>
+                    <th>Mensaje</th>
+                    <th>Total</th>
+                    <th>Enviados</th>
+                    <th>Fallidos</th>
+                    <th>Estado</th>
+                    <th>Creado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model)
+                {
+                    var porcentaje = job.Total > 0
+                    ? Math.Round((double)job.Sent / job.Total * 100, 1)
+                    : 0;
+
+                    <tr>
+                        <td>@job.JobId</td>
+                        <td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            @job.Message
+                        </td>
+                        <td>@job.Total</td>
+                        <td>
+                            @job.Sent
+                            <div class="progress mt-1" style="height:6px;">
+                                <div class="progress-bar bg-success"
+                                     role="progressbar"
+                                     style="width:@porcentaje%"></div>
+                            </div>
+                        </td>
+                        <td>@job.Failed</td>
+                        <td>
+                            @if (job.Status == "DONE")
+                            {
+                                <span class="badge bg-success">DONE</span>
+                            }
+                            else if (job.Status == "RUNNING")
+                            {
+                                <span class="badge bg-warning text-dark">RUNNING</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@job.Status</span>
+                            }
+                        </td>
+                        <td>@job.CreatedAt.ToLocalTime()</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               href="@Url.Action("EstadoJob", "Notificacion", new { id = job.JobId })">
+                                Ver
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

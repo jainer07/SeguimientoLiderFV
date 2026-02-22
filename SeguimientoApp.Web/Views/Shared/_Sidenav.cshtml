@@ -42,9 +42,18 @@
                 <!-- Notificaciones -->
                 <div class="sb-sidenav-menu-heading">Notificaciones</div>
                 <a class="nav-link @(controller == "Notificacion" && action == "EnviarSms" ? "active" : "")" asp-controller="Notificacion" asp-action="EnviarSms">
-                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    <div class="sb-nav-link-icon"><i class="fas fa-sms"></i></div>
                     Mensaje de texto
                 </a>
+                <a class="nav-link @(controller == "Notificacion" && action == "UltimoJob" ? "active" : "")" asp-controller="Notificacion" asp-action="UltimoJob">
+                    <div class="sb-nav-link-icon"><i class="fas fa-clock"></i></div>
+                    Último envío (SMS)
+                </a>
+                <a class="nav-link @(controller == "Notificacion" && action == "Jobs" ? "active" : "")" asp-controller="Notificacion" asp-action="Jobs">
+                    <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                    Historial SMS
+                </a>
+
                 <a class="nav-link @(controller == "Notificacion" && action == "EnviarWhatsapp" ? "active" : "")" asp-controller="Notificacion" asp-action="EnviarWhatsapp">
                     <div class="sb-nav-link-icon"><i class="fas fa-file-csv"></i></div>
                     Whatsapp
@@ -53,7 +62,7 @@
         </div>
         <div class="sb-sidenav-footer">
             <div class="small">Conectado como:</div>
-            Start Bootstrap
+            Fuerza Vallenata
         </div>
     </nav>
 </div>

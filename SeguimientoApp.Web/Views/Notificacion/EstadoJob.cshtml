@@ -1,0 +1,35 @@
+﻿@model SmsJobStatusDto
+
+@{
+    ViewData["Title"] = "Estado del envío";
+}
+
+<div class="container-fluid px-4">
+    <h3>Estado del Job #@Model.JobId</h3>
+
+    <div class="alert alert-info">
+        <b>Estado:</b> @Model.Status <br />
+        <b>Creado:</b> @Model.CreatedAt
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-2"><div class="card p-3"><b>Total</b><div>@Model.Total</div></div></div>
+        <div class="col-md-2"><div class="card p-3"><b>Enviados</b><div>@Model.Sent</div></div></div>
+        <div class="col-md-2"><div class="card p-3"><b>Fallidos</b><div>@Model.Failed</div></div></div>
+        <div class="col-md-2"><div class="card p-3"><b>Pendientes</b><div>@Model.Pending</div></div></div>
+        <div class="col-md-2"><div class="card p-3"><b>Reintento</b><div>@Model.Retry</div></div></div>
+        <div class="col-md-2"><div class="card p-3"><b>Enviando</b><div>@Model.Sending</div></div></div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <a class="btn btn-secondary" href="@Url.Action("EnviarSms", "Notificacion")">Volver</a>
+        <a class="btn btn-primary" href="@Url.Action("EstadoJob", "Notificacion", new { id = Model.JobId })">Actualizar</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // auto refresh cada 7s (suave, no estresa el server)
+        setTimeout(() => location.reload(), 7000);
+    </script>
+}

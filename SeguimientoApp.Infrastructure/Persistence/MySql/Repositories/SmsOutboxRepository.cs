@@ -9,6 +9,56 @@ namespace SeguimientoApp.Infrastructure.Persistence.MySql.Repositories
     {
         private readonly AppDbContext _db = db;
 
+        public async Task<SmsJobStatusDto?> GetJobStatusAsync(long jobId, CancellationToken ct = default)
+        {
+            var job = await _db.SmsJobModels
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IdJob == jobId, ct);
+
+            if (job == null) return null;
+
+            var counts = await _db.SmsOutboxModels
+                .AsNoTracking()
+                .Where(x => x.IdJob == jobId)
+                .GroupBy(x => x.Estado)
+                .Select(g => new { Estado = g.Key, Cnt = g.Count() })
+                .ToListAsync(ct);
+
+            int Get(string s) => counts.FirstOrDefault(x => x.Estado == s)?.Cnt ?? 0;
+
+            return new SmsJobStatusDto()
+            {
+                JobId = job.IdJob,
+                Status = job.Status,
+                Total = job.Total,
+                Sent = job.Sent,
+                Failed = job.Failed,
+                Pending = Get("PENDING"),
+                Retry = Get("RETRY"),
+                Sending = Get("SENDING"),
+                CreatedAt = job.CreatedAt
+            };
+        }
+
+        public async Task<List<SmsJobListItemDto>> GetRecentJobsAsync(int take, CancellationToken ct = default)
+        {
+            return await _db.SmsJobModels
+                .AsNoTracking()
+                .OrderByDescending(x => x.IdJob)
+                .Take(take)
+                .Select(x => new SmsJobListItemDto()
+                {
+                    JobId = x.IdJob,
+                    Message = x.Message,
+                    Total = x.Total,
+                    Sent = x.Sent,
+                    Failed = x.Failed,
+                    Status = x.Status,
+                    CreatedAt = x.CreatedAt
+                })
+                .ToListAsync(ct);
+        }
+
         public async Task<long> CreateJobAsync(string message, string target, int total, CancellationToken ct = default)
         {
             var job = new SmsJobModel

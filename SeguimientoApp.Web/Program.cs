@@ -19,6 +19,8 @@ var cs = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseMySql(cs, ServerVersion.AutoDetect(cs)));
 
+builder.Services.AddSession();
+
 builder.Services.AddScoped<IPersonaRepositoryPort, PersonaRepository>();
 builder.Services.AddScoped<GetPersonas>();
 builder.Services.AddScoped<GetPersonaById>();
@@ -36,6 +38,7 @@ builder.Services.AddScoped<IEventoActividadRepositoryPort, EventoActividadReposi
 builder.Services.AddScoped<IActividadRegistroRepositoryPort, ActividadRegistroRepository>();
 builder.Services.AddScoped<ISmsOutboxRepositoryPort, SmsOutboxRepository>();
 builder.Services.AddScoped<ScheduleSmsBulk>();
+builder.Services.AddScoped<GetSmsJob>();
 
 builder.Services.Configure<SmsSendingOptions>(builder.Configuration.GetSection("SmsSending"));
 builder.Services.AddHostedService<SmsOutboxWorker>();
@@ -66,9 +69,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
